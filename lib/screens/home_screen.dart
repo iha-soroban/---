@@ -85,8 +85,8 @@ class _HomeContent extends StatelessWidget {
               const SizedBox(height: 24),
               _buildChipSelectorCard(
                 label: '桁数',
-                options: const [1, 2, 3],
-                optionLabel: (v) => '$v桁',
+                options: const [1, 2, 3, 4, 5],
+                optionLabel: (v) => '$vケタ',
                 selectedValue: settings.digitCount,
                 onSelect: (v) => appState.updateSettings(
                   settings.copyWith(digitCount: v),
@@ -94,16 +94,16 @@ class _HomeContent extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               _buildChipSelectorCard(
-                label: '表示個数',
+                label: '口数',
                 options: const [3, 4, 5, 6, 7, 8, 9, 10],
-                optionLabel: (v) => '$v個',
+                optionLabel: (v) => '$v口',
                 selectedValue: settings.flashCount,
                 onSelect: (v) => appState.updateSettings(
                   settings.copyWith(flashCount: v),
                 ),
               ),
               const SizedBox(height: 16),
-              _buildSpeedStepperCard(context, appState, settings),
+              _buildDurationStepperCard(context, appState, settings),
               const SizedBox(height: 36),
               SizedBox(
                 width: double.infinity,
@@ -317,15 +317,15 @@ class _HomeContent extends StatelessWidget {
     );
   }
 
-  /// 表示スピードは +/- ボタンのステッパー式で調整(タップ操作のみで確実に動く)
-  Widget _buildSpeedStepperCard(
+  /// 表示スピードは全体の表示時間(秒)を +/- ボタンで調整(0.5秒刻み)
+  Widget _buildDurationStepperCard(
     BuildContext context,
     AppState appState,
     TrainingSettings settings,
   ) {
-    const double step = 100;
-    const double minSpeed = 200;
-    const double maxSpeed = 1500;
+    const double step = 0.5;
+    const double minDuration = 2;
+    const double maxDuration = 20;
 
     return Card(
       child: Padding(
@@ -334,7 +334,7 @@ class _HomeContent extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              '表示スピード',
+              '表示スピード(全体の時間)',
               style: TextStyle(
                 color: AppTheme.textSecondary,
                 fontSize: 14,
@@ -346,12 +346,12 @@ class _HomeContent extends StatelessWidget {
               children: [
                 _speedButton(
                   icon: Icons.remove,
-                  enabled: settings.flashSpeedMs > minSpeed,
+                  enabled: settings.totalDurationSeconds > minDuration,
                   onTap: () {
-                    final newVal =
-                        (settings.flashSpeedMs - step).clamp(minSpeed, maxSpeed);
+                    final newVal = (settings.totalDurationSeconds - step)
+                        .clamp(minDuration, maxDuration);
                     appState.updateSettings(
-                      settings.copyWith(flashSpeedMs: newVal),
+                      settings.copyWith(totalDurationSeconds: newVal),
                     );
                   },
                 ),
@@ -359,16 +359,16 @@ class _HomeContent extends StatelessWidget {
                   child: Column(
                     children: [
                       Text(
-                        settings.speedLabel,
+                        settings.durationLabel,
                         style: const TextStyle(
                           color: AppTheme.primaryYellow,
-                          fontSize: 18,
+                          fontSize: 22,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '${settings.flashSpeedMs.round()} ms / 個',
+                        '1口あたり ${settings.flashSpeedMs.round()} ms',
                         style: const TextStyle(
                           color: AppTheme.textSecondary,
                           fontSize: 12,
@@ -379,12 +379,12 @@ class _HomeContent extends StatelessWidget {
                 ),
                 _speedButton(
                   icon: Icons.add,
-                  enabled: settings.flashSpeedMs < maxSpeed,
+                  enabled: settings.totalDurationSeconds < maxDuration,
                   onTap: () {
-                    final newVal =
-                        (settings.flashSpeedMs + step).clamp(minSpeed, maxSpeed);
+                    final newVal = (settings.totalDurationSeconds + step)
+                        .clamp(minDuration, maxDuration);
                     appState.updateSettings(
-                      settings.copyWith(flashSpeedMs: newVal),
+                      settings.copyWith(totalDurationSeconds: newVal),
                     );
                   },
                 ),

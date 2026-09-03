@@ -197,7 +197,7 @@ class _TrainingScreenState extends State<TrainingScreen> {
           ),
           const Spacer(),
           Text(
-            '${_settings.digitCount}桁 × ${_settings.flashCount}個',
+            '${_settings.digitCount}ケタ × ${_settings.flashCount}口 (${_settings.durationLabel})',
             style: const TextStyle(
               color: AppTheme.textSecondary,
               fontSize: 13,
