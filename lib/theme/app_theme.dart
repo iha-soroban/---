@@ -19,7 +19,11 @@ class AppTheme {
       useMaterial3: true,
       brightness: Brightness.dark,
       scaffoldBackgroundColor: background,
-      fontFamily: 'Sorofont',
+      // 注意: SOROFONT4は数字グリフのみを含むフォントのため、
+      // テーマ全体のデフォルトフォントには設定しない。
+      // 日本語(漢字・カタカナ・丸数字など)がすべて表示されなくなってしまうため、
+      // 数字を表示する箇所(カウントダウン・フラッシュ数字・回答欄・結果表示)にのみ
+      // 個別に fontFamily: 'Sorofont' を指定する。
       colorScheme: const ColorScheme.dark(
         primary: primaryYellow,
         secondary: accentRed,
