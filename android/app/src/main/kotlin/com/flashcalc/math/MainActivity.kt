@@ -1,5 +1,6 @@
-package com.flashcalc.math.flash_calc
+package com.flashcalc.math
 
 import io.flutter.embedding.android.FlutterActivity
 
 class MainActivity : FlutterActivity()
+
