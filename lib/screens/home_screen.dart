@@ -111,7 +111,7 @@ class _HomeContentState extends State<_HomeContent> {
               const Icon(Icons.flash_on, color: AppTheme.primaryYellow),
               const SizedBox(width: 6),
               Text(
-                'FLASH CALC',
+                '伊波そろばん教室',
                 style: Theme.of(context).appBarTheme.titleTextStyle,
               ),
             ],

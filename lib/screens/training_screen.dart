@@ -201,9 +201,17 @@ class _TrainingScreenState extends State<TrainingScreen> {
       padding: const EdgeInsets.fromLTRB(8, 8, 16, 0),
       child: Row(
         children: [
-          IconButton(
+          TextButton.icon(
             onPressed: () => Navigator.of(context).pop(),
-            icon: const Icon(Icons.close, color: AppTheme.textSecondary),
+            style: TextButton.styleFrom(
+              foregroundColor: AppTheme.textSecondary,
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            ),
+            icon: const Icon(Icons.arrow_back_ios_new, size: 16),
+            label: const Text(
+              '設定へ戻る',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
           ),
           const Spacer(),
           Text(
