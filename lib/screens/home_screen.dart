@@ -187,6 +187,20 @@ class _HomeContentState extends State<_HomeContent> {
                           settings.copyWith(font: DisplayFont.mincho),
                         ),
                       ),
+                      const SizedBox(height: 16),
+                      _buildSectionLabel('サウンド(数字が出る時の「ピッ」音)'),
+                      const SizedBox(height: 8),
+                      _buildTwoWayToggle(
+                        leftLabel: 'ON',
+                        rightLabel: 'OFF',
+                        selectedLeft: settings.soundEnabled,
+                        onSelectLeft: () => appState.updateSettings(
+                          settings.copyWith(soundEnabled: true),
+                        ),
+                        onSelectRight: () => appState.updateSettings(
+                          settings.copyWith(soundEnabled: false),
+                        ),
+                      ),
                     ],
                   );
 

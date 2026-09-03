@@ -104,6 +104,7 @@ class TrainingSettings {
   final DisplayAlignment alignment; // 出題位置
   final DisplayFont font; // フォント
   final OperationMode operationMode; // 出題形式
+  final bool soundEnabled; // フラッシュ時の「ピッ」音のON/OFF
 
   const TrainingSettings({
     this.digitMode = DigitMode.d1,
@@ -112,6 +113,7 @@ class TrainingSettings {
     this.alignment = DisplayAlignment.center,
     this.font = DisplayFont.sorofont,
     this.operationMode = OperationMode.additionOnly,
+    this.soundEnabled = true,
   });
 
   /// 1口あたりの表示時間(ミリ秒)。全体時間を口数で割って算出。
@@ -125,6 +127,7 @@ class TrainingSettings {
     DisplayAlignment? alignment,
     DisplayFont? font,
     OperationMode? operationMode,
+    bool? soundEnabled,
   }) {
     return TrainingSettings(
       digitMode: digitMode ?? this.digitMode,
@@ -133,6 +136,7 @@ class TrainingSettings {
       alignment: alignment ?? this.alignment,
       font: font ?? this.font,
       operationMode: operationMode ?? this.operationMode,
+      soundEnabled: soundEnabled ?? this.soundEnabled,
     );
   }
 
@@ -144,6 +148,7 @@ class TrainingSettings {
       'alignment': alignment.index,
       'font': font.index,
       'operationMode': operationMode.index,
+      'soundEnabled': soundEnabled,
     };
   }
 
@@ -158,6 +163,7 @@ class TrainingSettings {
       font: DisplayFont.values[map['font'] as int? ?? 0],
       operationMode:
           OperationMode.values[map['operationMode'] as int? ?? 0],
+      soundEnabled: map['soundEnabled'] as bool? ?? true,
     );
   }
 

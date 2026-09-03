@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -37,6 +38,9 @@ class _TrainingScreenState extends State<TrainingScreen> {
 
   late TrainingSettings _settings;
 
+  // フラッシュ時の「ピッ」音再生用プレイヤー
+  final AudioPlayer _beepPlayer = AudioPlayer();
+
   @override
   void initState() {
     super.initState();
@@ -44,6 +48,9 @@ class _TrainingScreenState extends State<TrainingScreen> {
     final problem = ProblemGenerator.generate(_settings);
     _numbers = problem.numbers;
     _correctAnswer = problem.answer;
+    // 低レイテンシ再生モード + 音量固定(効果音として使うため)
+    _beepPlayer.setReleaseMode(ReleaseMode.stop);
+    _beepPlayer.setPlayerMode(PlayerMode.lowLatency);
     _startCountdown();
   }
 
@@ -52,7 +59,16 @@ class _TrainingScreenState extends State<TrainingScreen> {
     _timer?.cancel();
     _answerController.dispose();
     _answerFocusNode.dispose();
+    _beepPlayer.dispose();
     super.dispose();
+  }
+
+  /// フラッシュ表示ごとに短い「ピッ」音を再生する。
+  /// 設定でOFFにされている場合は何もしない。
+  void _playBeep() {
+    if (!_settings.soundEnabled) return;
+    // 同時再生時に前の再生を止めずに素早く鳴らすため resume ではなく play を使う
+    _beepPlayer.play(AssetSource('sounds/beep.mp3'), volume: 0.8);
   }
 
   void _startCountdown() {
@@ -76,6 +92,7 @@ class _TrainingScreenState extends State<TrainingScreen> {
       _phase = _TrainingPhase.flashing;
       _currentFlashIndex = 0;
     });
+    _playBeep(); // 最初の数字が表示された瞬間に「ピッ」
 
     final int flashOnMs = (_settings.flashSpeedMs * 0.7).round();
     final int flashOffMs = (_settings.flashSpeedMs * 0.3).round();
@@ -98,6 +115,7 @@ class _TrainingScreenState extends State<TrainingScreen> {
           setState(() {
             _currentFlashIndex = _flashStep;
           });
+          _playBeep(); // 次の数字が表示された瞬間に「ピッ」
           _scheduleNextFlash(onMs, offMs);
         }
       });
