@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../services/app_state.dart';
+import '../services/sound_service.dart';
 import '../models/training_settings.dart';
 import '../theme/app_theme.dart';
 import 'training_screen.dart';
@@ -247,6 +248,12 @@ class _HomeContentState extends State<_HomeContent> {
                     // 未確定の数値入力を反映してから開始する
                     _applyFlashCount(appState, appState.settings);
                     _applyDuration(appState, appState.settings);
+                    // 【重要】ブラウザの自動再生ポリシー対策:
+                    // ボタン押下という明確なユーザー操作の中で音声再生を
+                    // 一度実行し、AudioContext をアンロックしておく。
+                    // これを行わないと、後続のタイマー(カウントダウン等)
+                    // 経由の再生がブラウザにブロックされ、無音になる。
+                    SoundService.instance.unlockWithUserGesture();
                     Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (_) => const TrainingScreen(),

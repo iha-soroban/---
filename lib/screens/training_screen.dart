@@ -1,10 +1,10 @@
 import 'dart:async';
-import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../services/app_state.dart';
 import '../services/problem_generator.dart';
+import '../services/sound_service.dart';
 import '../models/training_settings.dart';
 import '../models/training_result.dart';
 import '../theme/app_theme.dart';
@@ -38,9 +38,6 @@ class _TrainingScreenState extends State<TrainingScreen> {
 
   late TrainingSettings _settings;
 
-  // フラッシュ時の「ピッ」音再生用プレイヤー
-  final AudioPlayer _beepPlayer = AudioPlayer();
-
   @override
   void initState() {
     super.initState();
@@ -48,9 +45,6 @@ class _TrainingScreenState extends State<TrainingScreen> {
     final problem = ProblemGenerator.generate(_settings);
     _numbers = problem.numbers;
     _correctAnswer = problem.answer;
-    // 低レイテンシ再生モード + 音量固定(効果音として使うため)
-    _beepPlayer.setReleaseMode(ReleaseMode.stop);
-    _beepPlayer.setPlayerMode(PlayerMode.lowLatency);
     _startCountdown();
   }
 
@@ -59,7 +53,6 @@ class _TrainingScreenState extends State<TrainingScreen> {
     _timer?.cancel();
     _answerController.dispose();
     _answerFocusNode.dispose();
-    _beepPlayer.dispose();
     super.dispose();
   }
 
@@ -67,8 +60,7 @@ class _TrainingScreenState extends State<TrainingScreen> {
   /// 設定でOFFにされている場合は何もしない。
   void _playBeep() {
     if (!_settings.soundEnabled) return;
-    // 同時再生時に前の再生を止めずに素早く鳴らすため resume ではなく play を使う
-    _beepPlayer.play(AssetSource('sounds/beep.mp3'), volume: 0.8);
+    SoundService.instance.playBeep();
   }
 
   void _startCountdown() {
