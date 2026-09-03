@@ -5,7 +5,7 @@
     "display": "standalone",
     "background_color": "#121212",
     "theme_color": "#FFC107",
-    "description": "フラッシュ暗算トレーニングアプリ",
+    "description": "数字暗算トレーニングアプリ",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
