@@ -182,7 +182,7 @@ class HistoryScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '${result.digitCount}ケタ × ${result.flashCount}口  (${result.operationModeLabel})',
+                  '${result.digitModeLabel} × ${result.flashCount}口  (${result.operationModeLabel})',
                   style: const TextStyle(
                     color: AppTheme.textPrimary,
                     fontSize: 13,

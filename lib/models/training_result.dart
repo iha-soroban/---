@@ -1,7 +1,7 @@
 /// 1回分のトレーニング結果(履歴保存用)
 class TrainingResult {
   final DateTime playedAt;
-  final int digitCount;
+  final String digitModeLabel; // 桁数パターンの短い表示ラベル(例: "3ケタ")
   final int flashCount;
   final double flashSpeedMs;
   final String operationModeLabel;
@@ -12,7 +12,7 @@ class TrainingResult {
 
   TrainingResult({
     required this.playedAt,
-    required this.digitCount,
+    required this.digitModeLabel,
     required this.flashCount,
     required this.flashSpeedMs,
     required this.operationModeLabel,
@@ -25,7 +25,7 @@ class TrainingResult {
   Map<String, dynamic> toMap() {
     return {
       'playedAt': playedAt.toIso8601String(),
-      'digitCount': digitCount,
+      'digitModeLabel': digitModeLabel,
       'flashCount': flashCount,
       'flashSpeedMs': flashSpeedMs,
       'operationModeLabel': operationModeLabel,
@@ -39,7 +39,8 @@ class TrainingResult {
   factory TrainingResult.fromMap(Map<String, dynamic> map) {
     return TrainingResult(
       playedAt: DateTime.parse(map['playedAt'] as String),
-      digitCount: map['digitCount'] as int? ?? 1,
+      digitModeLabel: map['digitModeLabel'] as String? ??
+          '${map['digitCount'] as int? ?? 1}ケタ', // 旧データ互換
       flashCount: map['flashCount'] as int? ?? 5,
       flashSpeedMs: (map['flashSpeedMs'] as num?)?.toDouble() ?? 800,
       operationModeLabel: map['operationModeLabel'] as String? ?? '',

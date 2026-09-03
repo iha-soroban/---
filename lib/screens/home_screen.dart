@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../services/app_state.dart';
 import '../models/training_settings.dart';
@@ -40,8 +41,57 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-class _HomeContent extends StatelessWidget {
+/// 「公式フラッシュ暗算」風の直感的な設定画面
+/// - 桁数: リストから選択(①〜⑫のパターン)
+/// - 口数・出題時間: 直接数値入力
+/// - 出題位置・フォント: ボタン選択
+class _HomeContent extends StatefulWidget {
   const _HomeContent();
+
+  @override
+  State<_HomeContent> createState() => _HomeContentState();
+}
+
+class _HomeContentState extends State<_HomeContent> {
+  late TextEditingController _flashCountController;
+  late TextEditingController _durationController;
+
+  @override
+  void initState() {
+    super.initState();
+    final settings = context.read<AppState>().settings;
+    _flashCountController =
+        TextEditingController(text: '${settings.flashCount}');
+    _durationController =
+        TextEditingController(text: settings.totalDurationSeconds.toString());
+  }
+
+  @override
+  void dispose() {
+    _flashCountController.dispose();
+    _durationController.dispose();
+    super.dispose();
+  }
+
+  void _applyFlashCount(AppState appState, TrainingSettings settings) {
+    final parsed = int.tryParse(_flashCountController.text.trim());
+    if (parsed == null) return;
+    final clamped = parsed.clamp(1, 20);
+    appState.updateSettings(settings.copyWith(flashCount: clamped));
+    if (clamped != parsed) {
+      _flashCountController.text = '$clamped';
+    }
+  }
+
+  void _applyDuration(AppState appState, TrainingSettings settings) {
+    final parsed = double.tryParse(_durationController.text.trim());
+    if (parsed == null) return;
+    final clamped = parsed.clamp(0.1, 60.0);
+    appState.updateSettings(settings.copyWith(totalDurationSeconds: clamped));
+    if (clamped != parsed) {
+      _durationController.text = '$clamped';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -67,48 +117,118 @@ class _HomeContent extends StatelessWidget {
           ),
         ),
         SliverPadding(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
           sliver: SliverList(
             delegate: SliverChildListDelegate([
-              const _SectionTitle('今の成績'),
-              const SizedBox(height: 10),
               _buildStatsSummary(context, appState),
+              const SizedBox(height: 20),
+
+              // ---- 桁数(リスト選択) & 右側パラメータ ----
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final isNarrow = constraints.maxWidth < 480;
+                  final digitList = _DigitModeList(
+                    settings: settings,
+                    onSelect: (mode) => appState.updateSettings(
+                      settings.copyWith(digitMode: mode),
+                    ),
+                  );
+                  final rightColumn = Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildOperationModeSelector(context, appState, settings),
+                      const SizedBox(height: 16),
+                      _buildNumberInputCard(
+                        label: '口数',
+                        suffix: '口(1〜20口)',
+                        controller: _flashCountController,
+                        onSubmit: () => _applyFlashCount(appState, settings),
+                        isInteger: true,
+                      ),
+                      const SizedBox(height: 16),
+                      _buildNumberInputCard(
+                        label: '出題時間',
+                        suffix: '秒(0.01秒刻み)',
+                        controller: _durationController,
+                        onSubmit: () => _applyDuration(appState, settings),
+                        isInteger: false,
+                      ),
+                      const SizedBox(height: 16),
+                      _buildSectionLabel('出題位置'),
+                      const SizedBox(height: 8),
+                      _buildTwoWayToggle(
+                        leftLabel: DisplayAlignment.center.label,
+                        rightLabel: DisplayAlignment.right.label,
+                        selectedLeft:
+                            settings.alignment == DisplayAlignment.center,
+                        onSelectLeft: () => appState.updateSettings(
+                          settings.copyWith(
+                              alignment: DisplayAlignment.center),
+                        ),
+                        onSelectRight: () => appState.updateSettings(
+                          settings.copyWith(alignment: DisplayAlignment.right),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      _buildSectionLabel('フォント'),
+                      const SizedBox(height: 8),
+                      _buildTwoWayToggle(
+                        leftLabel: DisplayFont.sorofont.label,
+                        rightLabel: DisplayFont.mincho.label,
+                        selectedLeft: settings.font == DisplayFont.sorofont,
+                        onSelectLeft: () => appState.updateSettings(
+                          settings.copyWith(font: DisplayFont.sorofont),
+                        ),
+                        onSelectRight: () => appState.updateSettings(
+                          settings.copyWith(font: DisplayFont.mincho),
+                        ),
+                      ),
+                    ],
+                  );
+
+                  if (isNarrow) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildSectionLabel('桁数'),
+                        const SizedBox(height: 8),
+                        digitList,
+                        const SizedBox(height: 20),
+                        rightColumn,
+                      ],
+                    );
+                  }
+
+                  return Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        flex: 6,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildSectionLabel('桁数'),
+                            const SizedBox(height: 8),
+                            digitList,
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(flex: 5, child: rightColumn),
+                    ],
+                  );
+                },
+              ),
+
               const SizedBox(height: 28),
-              const _SectionTitle('出題形式'),
-              const SizedBox(height: 10),
-              _buildOperationModeSelector(context, appState, settings),
-              const SizedBox(height: 24),
-              const _SectionTitle('桁数(1問あたりの数字の桁数)'),
-              const SizedBox(height: 10),
-              _buildChipSelectorCard(
-                options: const [1, 2, 3, 4, 5],
-                optionLabel: (v) => '$vケタ',
-                selectedValue: settings.digitCount,
-                onSelect: (v) => appState.updateSettings(
-                  settings.copyWith(digitCount: v),
-                ),
-              ),
-              const SizedBox(height: 24),
-              const _SectionTitle('口数(表示する数字の個数)'),
-              const SizedBox(height: 10),
-              _buildChipSelectorCard(
-                options: const [3, 4, 5, 6, 7, 8, 9, 10],
-                optionLabel: (v) => '$v口',
-                selectedValue: settings.flashCount,
-                onSelect: (v) => appState.updateSettings(
-                  settings.copyWith(flashCount: v),
-                ),
-              ),
-              const SizedBox(height: 24),
-              const _SectionTitle('表示スピード(全体の表示時間)'),
-              const SizedBox(height: 10),
-              _buildDurationStepperCard(context, appState, settings),
-              const SizedBox(height: 36),
               SizedBox(
                 width: double.infinity,
                 height: 64,
                 child: ElevatedButton(
                   onPressed: () {
+                    // 未確定の数値入力を反映してから開始する
+                    _applyFlashCount(appState, appState.settings);
+                    _applyDuration(appState, appState.settings);
                     Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (_) => const TrainingScreen(),
@@ -120,7 +240,7 @@ class _HomeContent extends StatelessWidget {
                     children: [
                       Icon(Icons.play_arrow, size: 28),
                       SizedBox(width: 8),
-                      Text('スタート', style: TextStyle(fontSize: 20)),
+                      Text('出題へ', style: TextStyle(fontSize: 20)),
                     ],
                   ),
                 ),
@@ -183,40 +303,73 @@ class _HomeContent extends StatelessWidget {
     );
   }
 
+  Widget _buildSectionLabel(String text) {
+    return Text(
+      text,
+      style: const TextStyle(
+        color: AppTheme.textSecondary,
+        fontSize: 14,
+        fontWeight: FontWeight.bold,
+      ),
+    );
+  }
+
   Widget _buildOperationModeSelector(
     BuildContext context,
     AppState appState,
     TrainingSettings settings,
   ) {
-    return Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(
-          child: _modeChip(
-            context: context,
-            label: '足し算のみ',
-            selected: settings.operationMode == OperationMode.additionOnly,
-            onTap: () => appState.updateSettings(
-              settings.copyWith(operationMode: OperationMode.additionOnly),
-            ),
+        _buildSectionLabel('出題形式'),
+        const SizedBox(height: 8),
+        _buildTwoWayToggle(
+          leftLabel: '足し算のみ',
+          rightLabel: '足し算・引き算',
+          selectedLeft:
+              settings.operationMode == OperationMode.additionOnly,
+          onSelectLeft: () => appState.updateSettings(
+            settings.copyWith(operationMode: OperationMode.additionOnly),
           ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _modeChip(
-            context: context,
-            label: '足し算・引き算',
-            selected: settings.operationMode == OperationMode.mixed,
-            onTap: () => appState.updateSettings(
-              settings.copyWith(operationMode: OperationMode.mixed),
-            ),
+          onSelectRight: () => appState.updateSettings(
+            settings.copyWith(operationMode: OperationMode.mixed),
           ),
         ),
       ],
     );
   }
 
-  Widget _modeChip({
-    required BuildContext context,
+  /// 2択のトグルボタン(出題位置・フォント・出題形式などで使う共通UI)
+  Widget _buildTwoWayToggle({
+    required String leftLabel,
+    required String rightLabel,
+    required bool selectedLeft,
+    required VoidCallback onSelectLeft,
+    required VoidCallback onSelectRight,
+  }) {
+    return Row(
+      children: [
+        Expanded(
+          child: _toggleChip(
+            label: leftLabel,
+            selected: selectedLeft,
+            onTap: onSelectLeft,
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: _toggleChip(
+            label: rightLabel,
+            selected: !selectedLeft,
+            onTap: onSelectRight,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _toggleChip({
     required String label,
     required bool selected,
     required VoidCallback onTap,
@@ -224,7 +377,7 @@ class _HomeContent extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
+        duration: const Duration(milliseconds: 150),
         padding: const EdgeInsets.symmetric(vertical: 14),
         decoration: BoxDecoration(
           color: selected ? AppTheme.primaryYellow : AppTheme.surface,
@@ -243,169 +396,131 @@ class _HomeContent extends StatelessWidget {
               fontWeight: FontWeight.bold,
               fontSize: 14,
             ),
+            textAlign: TextAlign.center,
           ),
         ),
       ),
     );
   }
 
-  /// タップだけで選択できるチップ選択式カード(桁数・表示個数用)
-  /// スクロール画面内でもドラッグ操作と競合しないよう、Sliderの代わりに採用。
-  Widget _buildChipSelectorCard({
-    required List<int> options,
-    required String Function(int) optionLabel,
-    required int selectedValue,
-    required ValueChanged<int> onSelect,
+  /// 口数・出題時間などの直接数値入力カード
+  Widget _buildNumberInputCard({
+    required String label,
+    required String suffix,
+    required TextEditingController controller,
+    required VoidCallback onSubmit,
+    required bool isInteger,
   }) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
-        child: Wrap(
-          spacing: 10,
-          runSpacing: 10,
-          children: options.map((opt) {
-            final selected = opt == selectedValue;
-            return GestureDetector(
-              onTap: () => onSelect(opt),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 150),
-                width: 52,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: selected
-                      ? AppTheme.primaryYellow
-                      : AppTheme.surfaceLight,
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
-                    color: selected
-                        ? AppTheme.primaryYellow
-                        : const Color(0xFF3A3A3A),
-                  ),
-                ),
-                child: Center(
-                  child: Text(
-                    optionLabel(opt),
-                    style: TextStyle(
-                      color: selected ? Colors.black : AppTheme.textPrimary,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                    ),
-                  ),
-                ),
-              ),
-            );
-          }).toList(),
-        ),
-      ),
-    );
-  }
-
-  /// 表示スピードは全体の表示時間(秒)を +/- ボタンで調整(0.5秒刻み)
-  Widget _buildDurationStepperCard(
-    BuildContext context,
-    AppState appState,
-    TrainingSettings settings,
-  ) {
-    const double step = 0.5;
-    const double minDuration = 2;
-    const double maxDuration = 20;
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _speedButton(
-              icon: Icons.remove,
-              enabled: settings.totalDurationSeconds > minDuration,
-              onTap: () {
-                final newVal = (settings.totalDurationSeconds - step)
-                    .clamp(minDuration, maxDuration);
-                appState.updateSettings(
-                  settings.copyWith(totalDurationSeconds: newVal),
-                );
-              },
-            ),
-            Expanded(
-              child: Column(
-                children: [
-                  Text(
-                    settings.durationLabel,
+            _buildSectionLabel(label),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                SizedBox(
+                  width: 90,
+                  child: TextField(
+                    controller: controller,
+                    keyboardType: TextInputType.numberWithOptions(
+                      decimal: !isInteger,
+                    ),
+                    inputFormatters: isInteger
+                        ? [FilteringTextInputFormatter.digitsOnly]
+                        : [
+                            FilteringTextInputFormatter.allow(
+                              RegExp(r'^\d*\.?\d*'),
+                            ),
+                          ],
+                    textAlign: TextAlign.center,
                     style: const TextStyle(
                       color: AppTheme.primaryYellow,
-                      fontSize: 22,
+                      fontSize: 20,
                       fontWeight: FontWeight.bold,
                     ),
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: AppTheme.surfaceLight,
+                      contentPadding:
+                          const EdgeInsets.symmetric(vertical: 12),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
+                    onSubmitted: (_) => onSubmit(),
+                    onTapOutside: (_) => onSubmit(),
+                    onEditingComplete: onSubmit,
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '1口あたり ${settings.flashSpeedMs.round()} ms',
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    suffix,
                     style: const TextStyle(
                       color: AppTheme.textSecondary,
-                      fontSize: 12,
+                      fontSize: 13,
                     ),
                   ),
-                ],
-              ),
-            ),
-            _speedButton(
-              icon: Icons.add,
-              enabled: settings.totalDurationSeconds < maxDuration,
-              onTap: () {
-                final newVal = (settings.totalDurationSeconds + step)
-                    .clamp(minDuration, maxDuration);
-                appState.updateSettings(
-                  settings.copyWith(totalDurationSeconds: newVal),
-                );
-              },
+                ),
+              ],
             ),
           ],
         ),
       ),
     );
   }
-
-  Widget _speedButton({
-    required IconData icon,
-    required bool enabled,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: enabled ? onTap : null,
-      child: Container(
-        width: 44,
-        height: 44,
-        decoration: BoxDecoration(
-          color: AppTheme.surfaceLight,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(
-            color: enabled
-                ? const Color(0xFF3A3A3A)
-                : const Color(0xFF2A2A2A),
-          ),
-        ),
-        child: Icon(
-          icon,
-          color: enabled ? AppTheme.primaryYellow : AppTheme.textSecondary,
-        ),
-      ),
-    );
-  }
 }
 
-/// 各設定セクションの見出しラベル
-class _SectionTitle extends StatelessWidget {
-  final String text;
-  const _SectionTitle(this.text);
+/// 桁数パターン(①〜⑫)を選択するリストウィジェット
+class _DigitModeList extends StatelessWidget {
+  final TrainingSettings settings;
+  final ValueChanged<DigitMode> onSelect;
+
+  const _DigitModeList({required this.settings, required this.onSelect});
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      text,
-      style: const TextStyle(
-        color: AppTheme.textSecondary,
-        fontSize: 14,
-        fontWeight: FontWeight.bold,
+    return Container(
+      decoration: BoxDecoration(
+        color: AppTheme.surface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0xFF2A2A2A)),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: DigitMode.values.map((mode) {
+          final selected = mode == settings.digitMode;
+          return InkWell(
+            onTap: () => onSelect(mode),
+            child: Container(
+              width: double.infinity,
+              padding:
+                  const EdgeInsets.symmetric(vertical: 13, horizontal: 16),
+              decoration: BoxDecoration(
+                color: selected
+                    ? AppTheme.primaryYellow
+                    : Colors.transparent,
+                border: const Border(
+                  bottom: BorderSide(color: Color(0xFF2A2A2A), width: 1),
+                ),
+              ),
+              child: Text(
+                mode.label,
+                style: TextStyle(
+                  color: selected ? Colors.black : AppTheme.textPrimary,
+                  fontWeight:
+                      selected ? FontWeight.bold : FontWeight.normal,
+                  fontSize: 15,
+                ),
+              ),
+            ),
+          );
+        }).toList(),
       ),
     );
   }

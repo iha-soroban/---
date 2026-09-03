@@ -136,7 +136,7 @@ class _TrainingScreenState extends State<TrainingScreen> {
     context.read<AppState>().addResult(
       TrainingResult(
         playedAt: DateTime.now(),
-        digitCount: _settings.digitCount,
+        digitModeLabel: _settings.digitMode.shortLabel,
         flashCount: _settings.flashCount,
         flashSpeedMs: _settings.flashSpeedMs,
         operationModeLabel: opLabel,
@@ -197,7 +197,7 @@ class _TrainingScreenState extends State<TrainingScreen> {
           ),
           const Spacer(),
           Text(
-            '${_settings.digitCount}ケタ × ${_settings.flashCount}口 (${_settings.durationLabel})',
+            '${_settings.digitMode.shortLabel} × ${_settings.flashCount}口 (${_settings.durationLabel})',
             style: const TextStyle(
               color: AppTheme.textSecondary,
               fontSize: 13,
@@ -260,7 +260,14 @@ class _TrainingScreenState extends State<TrainingScreen> {
         _currentFlashIndex >= 0 && _currentFlashIndex < _numbers.length;
     final number = showNumber ? _numbers[_currentFlashIndex] : null;
 
-    return Center(
+    final alignment = _settings.alignment == DisplayAlignment.center
+        ? Alignment.center
+        : Alignment.centerRight;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 32),
+      alignment: alignment,
       child: AnimatedSwitcher(
         duration: const Duration(milliseconds: 80),
         child: number == null
@@ -268,8 +275,8 @@ class _TrainingScreenState extends State<TrainingScreen> {
             : Text(
                 '$number',
                 key: ValueKey(_currentFlashIndex),
-                style: const TextStyle(
-                  fontFamily: 'Sorofont',
+                style: TextStyle(
+                  fontFamily: _settings.font.fontFamily,
                   fontSize: 96,
                   color: AppTheme.primaryYellow,
                   fontWeight: FontWeight.bold,
