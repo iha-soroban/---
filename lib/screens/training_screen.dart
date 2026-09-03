@@ -127,7 +127,7 @@ class _TrainingScreenState extends State<TrainingScreen> {
   }
 
   void _submitAnswer() {
-    final text = _answerController.text.trim();
+    final text = stripComma(_answerController.text.trim());
     final parsed = int.tryParse(text);
     final elapsed = _answerStartTime != null
         ? DateTime.now().difference(_answerStartTime!).inMilliseconds
@@ -327,7 +327,8 @@ class _TrainingScreenState extends State<TrainingScreen> {
               signed: true,
             ),
             inputFormatters: [
-              FilteringTextInputFormatter.allow(RegExp(r'^-?\d*')),
+              FilteringTextInputFormatter.allow(RegExp(r'^-?[\d,]*')),
+              CommaNumberInputFormatter(),
             ],
             textAlign: TextAlign.center,
             style: const TextStyle(
