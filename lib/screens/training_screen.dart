@@ -8,6 +8,7 @@ import '../services/sound_service.dart';
 import '../models/training_settings.dart';
 import '../models/training_result.dart';
 import '../theme/app_theme.dart';
+import '../utils/number_format.dart';
 
 enum _TrainingPhase { countdown, flashing, answering, result }
 
@@ -383,7 +384,7 @@ class _TrainingScreenState extends State<TrainingScreen> {
           ),
           const SizedBox(height: 24),
           Text(
-            '$_correctAnswer',
+            formatWithComma(_correctAnswer),
             style: const TextStyle(
               fontFamily: 'Sorofont',
               fontSize: 72,
@@ -399,7 +400,7 @@ class _TrainingScreenState extends State<TrainingScreen> {
           if (!_isCorrect) ...[
             const SizedBox(height: 16),
             Text(
-              'あなたの回答: ${_userAnswer ?? "未入力"}',
+              'あなたの回答: ${_userAnswer != null ? formatWithComma(_userAnswer!) : "未入力"}',
               style: const TextStyle(
                 color: AppTheme.textPrimary,
                 fontSize: 18,
