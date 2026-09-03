@@ -266,7 +266,7 @@ class _TrainingScreenState extends State<TrainingScreen> {
         child: number == null
             ? const SizedBox.shrink(key: ValueKey('blank'))
             : Text(
-                number > 0 ? '+$number' : '$number',
+                '$number',
                 key: ValueKey(_currentFlashIndex),
                 style: const TextStyle(
                   fontFamily: 'Sorofont',

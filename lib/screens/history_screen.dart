@@ -200,7 +200,7 @@ class HistoryScreen extends StatelessWidget {
             ),
           ),
           Text(
-            '${(result.answerTimeMs / 1000).toStringAsFixed(1)}s',
+            '${(result.answerTimeMs / 1000).toStringAsFixed(1)}秒',
             style: const TextStyle(
               color: AppTheme.textSecondary,
               fontSize: 12,

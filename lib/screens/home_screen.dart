@@ -70,21 +70,17 @@ class _HomeContent extends StatelessWidget {
           padding: const EdgeInsets.all(20),
           sliver: SliverList(
             delegate: SliverChildListDelegate([
+              const _SectionTitle('今の成績'),
+              const SizedBox(height: 10),
               _buildStatsSummary(context, appState),
-              const SizedBox(height: 24),
-              const Text(
-                '出題形式',
-                style: TextStyle(
-                  color: AppTheme.textSecondary,
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+              const SizedBox(height: 28),
+              const _SectionTitle('出題形式'),
               const SizedBox(height: 10),
               _buildOperationModeSelector(context, appState, settings),
               const SizedBox(height: 24),
+              const _SectionTitle('桁数(1問あたりの数字の桁数)'),
+              const SizedBox(height: 10),
               _buildChipSelectorCard(
-                label: '桁数',
                 options: const [1, 2, 3, 4, 5],
                 optionLabel: (v) => '$vケタ',
                 selectedValue: settings.digitCount,
@@ -92,9 +88,10 @@ class _HomeContent extends StatelessWidget {
                   settings.copyWith(digitCount: v),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 24),
+              const _SectionTitle('口数(表示する数字の個数)'),
+              const SizedBox(height: 10),
               _buildChipSelectorCard(
-                label: '口数',
                 options: const [3, 4, 5, 6, 7, 8, 9, 10],
                 optionLabel: (v) => '$v口',
                 selectedValue: settings.flashCount,
@@ -102,7 +99,9 @@ class _HomeContent extends StatelessWidget {
                   settings.copyWith(flashCount: v),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 24),
+              const _SectionTitle('表示スピード(全体の表示時間)'),
+              const SizedBox(height: 10),
               _buildDurationStepperCard(context, appState, settings),
               const SizedBox(height: 36),
               SizedBox(
@@ -142,9 +141,9 @@ class _HomeContent extends StatelessWidget {
           children: [
             _statItem('正解率', '${appState.accuracyRate.toStringAsFixed(0)}%'),
             _verticalDivider(),
-            _statItem('連続正解', '${appState.currentStreak}'),
+            _statItem('連続正解', '${appState.currentStreak}回'),
             _verticalDivider(),
-            _statItem('総回数', '${appState.totalCount}'),
+            _statItem('総回数', '${appState.totalCount}回'),
           ],
         ),
       ),
@@ -253,7 +252,6 @@ class _HomeContent extends StatelessWidget {
   /// タップだけで選択できるチップ選択式カード(桁数・表示個数用)
   /// スクロール画面内でもドラッグ操作と競合しないよう、Sliderの代わりに採用。
   Widget _buildChipSelectorCard({
-    required String label,
     required List<int> options,
     required String Function(int) optionLabel,
     required int selectedValue,
@@ -262,56 +260,41 @@ class _HomeContent extends StatelessWidget {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              label,
-              style: const TextStyle(
-                color: AppTheme.textSecondary,
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Wrap(
-              spacing: 10,
-              runSpacing: 10,
-              children: options.map((opt) {
-                final selected = opt == selectedValue;
-                return GestureDetector(
-                  onTap: () => onSelect(opt),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 150),
-                    width: 52,
-                    height: 44,
-                    decoration: BoxDecoration(
-                      color: selected
-                          ? AppTheme.primaryYellow
-                          : AppTheme.surfaceLight,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                        color: selected
-                            ? AppTheme.primaryYellow
-                            : const Color(0xFF3A3A3A),
-                      ),
-                    ),
-                    child: Center(
-                      child: Text(
-                        optionLabel(opt),
-                        style: TextStyle(
-                          color:
-                              selected ? Colors.black : AppTheme.textPrimary,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                        ),
-                      ),
+        child: Wrap(
+          spacing: 10,
+          runSpacing: 10,
+          children: options.map((opt) {
+            final selected = opt == selectedValue;
+            return GestureDetector(
+              onTap: () => onSelect(opt),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 150),
+                width: 52,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: selected
+                      ? AppTheme.primaryYellow
+                      : AppTheme.surfaceLight,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: selected
+                        ? AppTheme.primaryYellow
+                        : const Color(0xFF3A3A3A),
+                  ),
+                ),
+                child: Center(
+                  child: Text(
+                    optionLabel(opt),
+                    style: TextStyle(
+                      color: selected ? Colors.black : AppTheme.textPrimary,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
                     ),
                   ),
-                );
-              }).toList(),
-            ),
-          ],
+                ),
+              ),
+            );
+          }).toList(),
         ),
       ),
     );
@@ -330,65 +313,51 @@ class _HomeContent extends StatelessWidget {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Row(
           children: [
-            const Text(
-              '表示スピード(全体の時間)',
-              style: TextStyle(
-                color: AppTheme.textSecondary,
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
+            _speedButton(
+              icon: Icons.remove,
+              enabled: settings.totalDurationSeconds > minDuration,
+              onTap: () {
+                final newVal = (settings.totalDurationSeconds - step)
+                    .clamp(minDuration, maxDuration);
+                appState.updateSettings(
+                  settings.copyWith(totalDurationSeconds: newVal),
+                );
+              },
+            ),
+            Expanded(
+              child: Column(
+                children: [
+                  Text(
+                    settings.durationLabel,
+                    style: const TextStyle(
+                      color: AppTheme.primaryYellow,
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '1口あたり ${settings.flashSpeedMs.round()} ms',
+                    style: const TextStyle(
+                      color: AppTheme.textSecondary,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                _speedButton(
-                  icon: Icons.remove,
-                  enabled: settings.totalDurationSeconds > minDuration,
-                  onTap: () {
-                    final newVal = (settings.totalDurationSeconds - step)
-                        .clamp(minDuration, maxDuration);
-                    appState.updateSettings(
-                      settings.copyWith(totalDurationSeconds: newVal),
-                    );
-                  },
-                ),
-                Expanded(
-                  child: Column(
-                    children: [
-                      Text(
-                        settings.durationLabel,
-                        style: const TextStyle(
-                          color: AppTheme.primaryYellow,
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '1口あたり ${settings.flashSpeedMs.round()} ms',
-                        style: const TextStyle(
-                          color: AppTheme.textSecondary,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                _speedButton(
-                  icon: Icons.add,
-                  enabled: settings.totalDurationSeconds < maxDuration,
-                  onTap: () {
-                    final newVal = (settings.totalDurationSeconds + step)
-                        .clamp(minDuration, maxDuration);
-                    appState.updateSettings(
-                      settings.copyWith(totalDurationSeconds: newVal),
-                    );
-                  },
-                ),
-              ],
+            _speedButton(
+              icon: Icons.add,
+              enabled: settings.totalDurationSeconds < maxDuration,
+              onTap: () {
+                final newVal = (settings.totalDurationSeconds + step)
+                    .clamp(minDuration, maxDuration);
+                appState.updateSettings(
+                  settings.copyWith(totalDurationSeconds: newVal),
+                );
+              },
             ),
           ],
         ),
@@ -419,6 +388,24 @@ class _HomeContent extends StatelessWidget {
           icon,
           color: enabled ? AppTheme.primaryYellow : AppTheme.textSecondary,
         ),
+      ),
+    );
+  }
+}
+
+/// 各設定セクションの見出しラベル
+class _SectionTitle extends StatelessWidget {
+  final String text;
+  const _SectionTitle(this.text);
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text,
+      style: const TextStyle(
+        color: AppTheme.textSecondary,
+        fontSize: 14,
+        fontWeight: FontWeight.bold,
       ),
     );
   }
