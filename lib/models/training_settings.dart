@@ -52,21 +52,21 @@ extension DigitModeInfo on DigitMode {
     }
   }
 
-  /// 番号付きの表示ラベル(①1桁 など)
+  /// 番号付きの表示ラベル(①1ケタ など)
   String get label {
     const labels = {
-      DigitMode.d1: '①  1桁',
-      DigitMode.d1_2: '②  1桁と2桁',
-      DigitMode.d2: '③  2桁',
-      DigitMode.d1_2_3: '④  1桁と2桁と3桁',
-      DigitMode.d2_3: '⑤  2桁と3桁',
-      DigitMode.d3: '⑥  3桁',
-      DigitMode.d2_3_4: '⑦  2桁と3桁と4桁',
-      DigitMode.d3_4: '⑧  3桁と4桁',
-      DigitMode.d4: '⑨  4桁',
-      DigitMode.d3_4_5: '⑩  3桁と4桁と5桁',
-      DigitMode.d4_5: '⑪  4桁と5桁',
-      DigitMode.d5: '⑫  5桁',
+      DigitMode.d1: '①  1ケタ',
+      DigitMode.d1_2: '②  1ケタと2ケタ',
+      DigitMode.d2: '③  2ケタ',
+      DigitMode.d1_2_3: '④  1ケタと2ケタと3ケタ',
+      DigitMode.d2_3: '⑤  2ケタと3ケタ',
+      DigitMode.d3: '⑥  3ケタ',
+      DigitMode.d2_3_4: '⑦  2ケタと3ケタと4ケタ',
+      DigitMode.d3_4: '⑧  3ケタと4ケタ',
+      DigitMode.d4: '⑨  4ケタ',
+      DigitMode.d3_4_5: '⑩  3ケタと4ケタと5ケタ',
+      DigitMode.d4_5: '⑪  4ケタと5ケタ',
+      DigitMode.d5: '⑫  5ケタ',
     };
     return labels[this]!;
   }

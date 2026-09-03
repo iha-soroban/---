@@ -121,6 +121,8 @@ class _HomeContentState extends State<_HomeContent> {
           sliver: SliverList(
             delegate: SliverChildListDelegate([
               _buildStatsSummary(context, appState),
+              const SizedBox(height: 16),
+              _buildCurrentSettingsSummary(settings),
               const SizedBox(height: 20),
 
               // ---- 桁数(リスト選択) & 右側パラメータ ----
@@ -139,16 +141,18 @@ class _HomeContentState extends State<_HomeContent> {
                       _buildOperationModeSelector(context, appState, settings),
                       const SizedBox(height: 16),
                       _buildNumberInputCard(
-                        label: '口数',
-                        suffix: '口(1〜20口)',
+                        label: '口数(何口出題するか)',
+                        unit: '口',
+                        helperText: '1〜20口の範囲で指定できます',
                         controller: _flashCountController,
                         onSubmit: () => _applyFlashCount(appState, settings),
                         isInteger: true,
                       ),
                       const SizedBox(height: 16),
                       _buildNumberInputCard(
-                        label: '出題時間',
-                        suffix: '秒(0.01秒刻み)',
+                        label: '出題時間(全部で何秒で出すか)',
+                        unit: '秒',
+                        helperText: '0.01秒刻みで指定できます',
                         controller: _durationController,
                         onSubmit: () => _applyDuration(appState, settings),
                         isInteger: false,
@@ -190,7 +194,7 @@ class _HomeContentState extends State<_HomeContent> {
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _buildSectionLabel('桁数'),
+                        _buildSectionLabel('桁数(何ケタの数を出題するか)'),
                         const SizedBox(height: 8),
                         digitList,
                         const SizedBox(height: 20),
@@ -207,7 +211,7 @@ class _HomeContentState extends State<_HomeContent> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _buildSectionLabel('桁数'),
+                            _buildSectionLabel('桁数(何ケタの数を出題するか)'),
                             const SizedBox(height: 8),
                             digitList,
                           ],
@@ -267,6 +271,56 @@ class _HomeContentState extends State<_HomeContent> {
           ],
         ),
       ),
+    );
+  }
+
+  /// 現在の設定を「何ケタ・何口・何秒」の形で常に一目でわかるように表示するカード
+  Widget _buildCurrentSettingsSummary(TrainingSettings settings) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+      decoration: BoxDecoration(
+        color: AppTheme.surface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppTheme.primaryYellow.withValues(alpha: 0.5)),
+      ),
+      child: Wrap(
+        alignment: WrapAlignment.center,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        spacing: 6,
+        runSpacing: 6,
+        children: [
+          _summaryChip(settings.digitMode.shortLabel),
+          _summaryDot(),
+          _summaryChip('${settings.flashCount}口'),
+          _summaryDot(),
+          _summaryChip(settings.durationLabel),
+          _summaryDot(),
+          _summaryChip(
+            settings.operationMode == OperationMode.additionOnly
+                ? '足し算のみ'
+                : '足し算・引き算',
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _summaryChip(String text) {
+    return Text(
+      text,
+      style: const TextStyle(
+        color: AppTheme.primaryYellow,
+        fontSize: 15,
+        fontWeight: FontWeight.bold,
+      ),
+    );
+  }
+
+  Widget _summaryDot() {
+    return const Text(
+      '・',
+      style: TextStyle(color: AppTheme.textSecondary, fontSize: 15),
     );
   }
 
@@ -404,9 +458,12 @@ class _HomeContentState extends State<_HomeContent> {
   }
 
   /// 口数・出題時間などの直接数値入力カード
+  /// 入力欄の中に「口」「秒」などの単位を直接表示することで、
+  /// 数字だけを見ても何を意味する値かが一目でわかるようにする。
   Widget _buildNumberInputCard({
     required String label,
-    required String suffix,
+    required String unit,
+    required String helperText,
     required TextEditingController controller,
     required VoidCallback onSubmit,
     required bool isInteger,
@@ -419,54 +476,51 @@ class _HomeContentState extends State<_HomeContent> {
           children: [
             _buildSectionLabel(label),
             const SizedBox(height: 10),
-            Row(
-              children: [
-                SizedBox(
-                  width: 90,
-                  child: TextField(
-                    controller: controller,
-                    keyboardType: TextInputType.numberWithOptions(
-                      decimal: !isInteger,
-                    ),
-                    inputFormatters: isInteger
-                        ? [FilteringTextInputFormatter.digitsOnly]
-                        : [
-                            FilteringTextInputFormatter.allow(
-                              RegExp(r'^\d*\.?\d*'),
-                            ),
-                          ],
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      color: AppTheme.primaryYellow,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: AppTheme.surfaceLight,
-                      contentPadding:
-                          const EdgeInsets.symmetric(vertical: 12),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide.none,
+            TextField(
+              controller: controller,
+              keyboardType: TextInputType.numberWithOptions(
+                decimal: !isInteger,
+              ),
+              inputFormatters: isInteger
+                  ? [FilteringTextInputFormatter.digitsOnly]
+                  : [
+                      FilteringTextInputFormatter.allow(
+                        RegExp(r'^\d*\.?\d*'),
                       ),
-                    ),
-                    onSubmitted: (_) => onSubmit(),
-                    onTapOutside: (_) => onSubmit(),
-                    onEditingComplete: onSubmit,
-                  ),
+                    ],
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: AppTheme.primaryYellow,
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+              ),
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: AppTheme.surfaceLight,
+                contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                // 単位(口・秒など)を入力欄の右側に直接表示
+                suffixText: unit,
+                suffixStyle: const TextStyle(
+                  color: AppTheme.primaryYellow,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    suffix,
-                    style: const TextStyle(
-                      color: AppTheme.textSecondary,
-                      fontSize: 13,
-                    ),
-                  ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide.none,
                 ),
-              ],
+              ),
+              onSubmitted: (_) => onSubmit(),
+              onTapOutside: (_) => onSubmit(),
+              onEditingComplete: onSubmit,
+            ),
+            const SizedBox(height: 6),
+            Text(
+              helperText,
+              style: const TextStyle(
+                color: AppTheme.textSecondary,
+                fontSize: 12,
+              ),
             ),
           ],
         ),
