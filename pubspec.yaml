@@ -1,5 +1,5 @@
 name: flash_calc
-description: "数字暗算トレーニングアプリ"
+description: "数字暗算トレーニングアプリ / Mental arithmetic (Anzan) training app"
 publish_to: 'none'
 
 version: 1.0.0+1

@@ -1,11 +1,12 @@
 {
-    "name": "伊波そろばん教室",
+    "name": "伊波そろばん教室 | Iha Soroban Classroom",
     "short_name": "伊波そろばん教室",
+    "lang": "ja",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#121212",
     "theme_color": "#FFC107",
-    "description": "数字暗算トレーニングアプリ",
+    "description": "数字暗算トレーニングアプリ / Mental arithmetic (Anzan) training app",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
