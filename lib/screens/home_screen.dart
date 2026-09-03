@@ -83,51 +83,27 @@ class _HomeContent extends StatelessWidget {
               const SizedBox(height: 10),
               _buildOperationModeSelector(context, appState, settings),
               const SizedBox(height: 24),
-              _buildSliderCard(
-                context: context,
+              _buildChipSelectorCard(
                 label: '桁数',
-                valueLabel: '${settings.digitCount}桁',
-                value: settings.digitCount.toDouble(),
-                min: 1,
-                max: 3,
-                divisions: 2,
-                onChanged: (v) {
-                  appState.updateSettings(
-                    settings.copyWith(digitCount: v.round()),
-                  );
-                },
+                options: const [1, 2, 3],
+                optionLabel: (v) => '$v桁',
+                selectedValue: settings.digitCount,
+                onSelect: (v) => appState.updateSettings(
+                  settings.copyWith(digitCount: v),
+                ),
               ),
               const SizedBox(height: 16),
-              _buildSliderCard(
-                context: context,
+              _buildChipSelectorCard(
                 label: '表示個数',
-                valueLabel: '${settings.flashCount}個',
-                value: settings.flashCount.toDouble(),
-                min: 3,
-                max: 10,
-                divisions: 7,
-                onChanged: (v) {
-                  appState.updateSettings(
-                    settings.copyWith(flashCount: v.round()),
-                  );
-                },
+                options: const [3, 4, 5, 6, 7, 8, 9, 10],
+                optionLabel: (v) => '$v個',
+                selectedValue: settings.flashCount,
+                onSelect: (v) => appState.updateSettings(
+                  settings.copyWith(flashCount: v),
+                ),
               ),
               const SizedBox(height: 16),
-              _buildSliderCard(
-                context: context,
-                label: '表示スピード',
-                valueLabel: settings.speedLabel,
-                value: settings.flashSpeedMs,
-                min: 200,
-                max: 1500,
-                divisions: 13,
-                onChanged: (v) {
-                  appState.updateSettings(
-                    settings.copyWith(flashSpeedMs: v),
-                  );
-                },
-                reverseTrackHint: true,
-              ),
+              _buildSpeedStepperCard(context, appState, settings),
               const SizedBox(height: 36),
               SizedBox(
                 width: double.infinity,
@@ -274,52 +250,174 @@ class _HomeContent extends StatelessWidget {
     );
   }
 
-  Widget _buildSliderCard({
-    required BuildContext context,
+  /// タップだけで選択できるチップ選択式カード(桁数・表示個数用)
+  /// スクロール画面内でもドラッグ操作と競合しないよう、Sliderの代わりに採用。
+  Widget _buildChipSelectorCard({
     required String label,
-    required String valueLabel,
-    required double value,
-    required double min,
-    required double max,
-    required int divisions,
-    required ValueChanged<double> onChanged,
-    bool reverseTrackHint = false,
+    required List<int> options,
+    required String Function(int) optionLabel,
+    required int selectedValue,
+    required ValueChanged<int> onSelect,
   }) {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(18, 14, 18, 4),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Text(
+              label,
+              style: const TextStyle(
+                color: AppTheme.textSecondary,
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 10,
+              runSpacing: 10,
+              children: options.map((opt) {
+                final selected = opt == selectedValue;
+                return GestureDetector(
+                  onTap: () => onSelect(opt),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 150),
+                    width: 52,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: selected
+                          ? AppTheme.primaryYellow
+                          : AppTheme.surfaceLight,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: selected
+                            ? AppTheme.primaryYellow
+                            : const Color(0xFF3A3A3A),
+                      ),
+                    ),
+                    child: Center(
+                      child: Text(
+                        optionLabel(opt),
+                        style: TextStyle(
+                          color:
+                              selected ? Colors.black : AppTheme.textPrimary,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// 表示スピードは +/- ボタンのステッパー式で調整(タップ操作のみで確実に動く)
+  Widget _buildSpeedStepperCard(
+    BuildContext context,
+    AppState appState,
+    TrainingSettings settings,
+  ) {
+    const double step = 100;
+    const double minSpeed = 200;
+    const double maxSpeed = 1500;
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              '表示スピード',
+              style: TextStyle(
+                color: AppTheme.textSecondary,
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 12),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  label,
-                  style: const TextStyle(
-                    color: AppTheme.textSecondary,
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
+                _speedButton(
+                  icon: Icons.remove,
+                  enabled: settings.flashSpeedMs > minSpeed,
+                  onTap: () {
+                    final newVal =
+                        (settings.flashSpeedMs - step).clamp(minSpeed, maxSpeed);
+                    appState.updateSettings(
+                      settings.copyWith(flashSpeedMs: newVal),
+                    );
+                  },
+                ),
+                Expanded(
+                  child: Column(
+                    children: [
+                      Text(
+                        settings.speedLabel,
+                        style: const TextStyle(
+                          color: AppTheme.primaryYellow,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '${settings.flashSpeedMs.round()} ms / 個',
+                        style: const TextStyle(
+                          color: AppTheme.textSecondary,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                Text(
-                  valueLabel,
-                  style: const TextStyle(
-                    color: AppTheme.primaryYellow,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
+                _speedButton(
+                  icon: Icons.add,
+                  enabled: settings.flashSpeedMs < maxSpeed,
+                  onTap: () {
+                    final newVal =
+                        (settings.flashSpeedMs + step).clamp(minSpeed, maxSpeed);
+                    appState.updateSettings(
+                      settings.copyWith(flashSpeedMs: newVal),
+                    );
+                  },
                 ),
               ],
             ),
-            Slider(
-              value: value,
-              min: min,
-              max: max,
-              divisions: divisions,
-              onChanged: onChanged,
-            ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _speedButton({
+    required IconData icon,
+    required bool enabled,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: enabled ? onTap : null,
+      child: Container(
+        width: 44,
+        height: 44,
+        decoration: BoxDecoration(
+          color: AppTheme.surfaceLight,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: enabled
+                ? const Color(0xFF3A3A3A)
+                : const Color(0xFF2A2A2A),
+          ),
+        ),
+        child: Icon(
+          icon,
+          color: enabled ? AppTheme.primaryYellow : AppTheme.textSecondary,
         ),
       ),
     );
