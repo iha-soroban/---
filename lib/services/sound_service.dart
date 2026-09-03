@@ -1,5 +1,4 @@
 import 'package:audioplayers/audioplayers.dart';
-import 'package:flutter/foundation.dart';
 
 /// フラッシュ暗算の「ピッ」音を管理するシングルトンサービス。
 ///
@@ -25,12 +24,9 @@ class SoundService {
     _initialized = true;
     try {
       await _player.setReleaseMode(ReleaseMode.stop);
-      await _player.setPlayerMode(PlayerMode.lowLatency);
       await _player.setSource(AssetSource('sounds/beep.mp3'));
-    } catch (e) {
-      if (kDebugMode) {
-        debugPrint('SoundService init error: $e');
-      }
+    } catch (_) {
+      // 初期化に失敗した場合は無音のまま継続する。
     }
   }
 
@@ -44,10 +40,8 @@ class SoundService {
       // 一瞬だけ再生してすぐ止める(アンロック目的)。
       await _player.resume();
       _unlocked = true;
-    } catch (e) {
-      if (kDebugMode) {
-        debugPrint('SoundService unlock error: $e');
-      }
+    } catch (_) {
+      // アンロックに失敗しても致命的ではないため継続する。
     }
   }
 
@@ -59,10 +53,8 @@ class SoundService {
       await _player.setVolume(volume);
       await _player.seek(Duration.zero);
       await _player.resume();
-    } catch (e) {
-      if (kDebugMode) {
-        debugPrint('SoundService playBeep error: $e');
-      }
+    } catch (_) {
+      // 再生に失敗しても致命的ではないため継続する。
     }
   }
 
