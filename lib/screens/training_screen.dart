@@ -292,7 +292,7 @@ class _TrainingScreenState extends State<TrainingScreen> {
         child: number == null
             ? const SizedBox.shrink(key: ValueKey('blank'))
             : Text(
-                '$number',
+                formatWithComma(number),
                 key: ValueKey(_currentFlashIndex),
                 style: TextStyle(
                   fontFamily: _settings.font.fontFamily,
