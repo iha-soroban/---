@@ -255,8 +255,9 @@ class _TrainingScreenState extends State<TrainingScreen> {
             child: Center(
               child: Text(
                 _countdownValue > 0 ? '$_countdownValue' : 'GO',
+                // カウントダウンは出題フォント(そろばん/明朝)の設定に関わらず、
+                // 常に標準フォントで表示し、問題の数字と見分けやすくする。
                 style: const TextStyle(
-                  fontFamily: 'Sorofont',
                   fontSize: 56,
                   color: AppTheme.primaryYellow,
                   fontWeight: FontWeight.bold,

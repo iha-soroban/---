@@ -24,14 +24,30 @@ class ProblemGenerator {
       final int minValue = pow(10, digitCount - 1).toInt();
       final int maxValue = pow(10, digitCount).toInt() - 1;
 
-      int value = minValue + _random.nextInt(maxValue - minValue + 1);
+      int value;
+      bool doSubtract;
 
-      bool canSubtract = settings.operationMode == OperationMode.mixed &&
-          i > 0 && // 最初の数字は必ず正の数(合計の起点)
-          runningTotal - value >= 0;
+      // 直前の口と同じ数字(絶対値)が連続して出ないように、
+      // 範囲が許す限り再抽選する(無限ループ防止のため最大試行回数を設定)。
+      int attempts = 0;
+      const int maxAttempts = 20;
+      final int? previousAbsValue = numbers.isNotEmpty ? numbers.last.abs() : null;
 
-      // 混合モードでは50%の確率で引き算にする(可能な場合)
-      bool doSubtract = canSubtract && _random.nextBool();
+      do {
+        value = minValue + _random.nextInt(maxValue - minValue + 1);
+
+        final bool canSubtract = settings.operationMode == OperationMode.mixed &&
+            i > 0 && // 最初の数字は必ず正の数(合計の起点)
+            runningTotal - value >= 0;
+
+        // 混合モードでは50%の確率で引き算にする(可能な場合)
+        doSubtract = canSubtract && _random.nextBool();
+
+        attempts++;
+      } while (previousAbsValue != null &&
+          value == previousAbsValue &&
+          maxValue > minValue && // 選択肢が複数ある場合のみ再抽選
+          attempts < maxAttempts);
 
       if (doSubtract) {
         value = -value;

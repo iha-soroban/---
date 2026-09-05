@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (_) => AppState()..init(),
       child: MaterialApp(
-        title: 'Flash Calc',
+        title: 'そろばん式暗算トレーニング',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.darkTheme,
         home: const HomeScreen(),

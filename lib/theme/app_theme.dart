@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// Flash Calc アプリのテーマ定義
+/// そろばん式暗算トレーニング アプリのテーマ定義
 /// 黒背景 x 黄色アクセントの高コントラストデザイン(フラッシュ暗算風)
 class AppTheme {
   AppTheme._();

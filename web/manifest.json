@@ -1,12 +1,12 @@
 {
-    "name": "伊波そろばん教室 | Iha Soroban School",
+    "name": "そろばん式暗算トレーニング | 伊波そろばん教室",
     "short_name": "伊波そろばん教室",
     "lang": "ja",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#121212",
     "theme_color": "#FFC107",
-    "description": "数字暗算トレーニングアプリ / Mental arithmetic (Anzan) training app",
+    "description": "無料で使えるそろばん式暗算トレーニングアプリ。数字がフラッシュ表示され、瞬時に暗算して答える練習ができます。伊波そろばん教室がオンラインで全国から生徒を募集中。",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
