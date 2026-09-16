@@ -105,6 +105,11 @@ class _HomeContentState extends State<_HomeContent> {
           backgroundColor: AppTheme.background,
           pinned: true,
           centerTitle: true,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_ios_new,
+                color: AppTheme.textSecondary, size: 18),
+            onPressed: () => Navigator.of(context).maybePop(),
+          ),
           title: Row(
             mainAxisSize: MainAxisSize.min,
             children: [

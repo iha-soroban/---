@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'services/app_state.dart';
 import 'services/storage_service.dart';
 import 'theme/app_theme.dart';
-import 'screens/home_screen.dart';
+import 'screens/mode_select_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,7 +22,7 @@ class MyApp extends StatelessWidget {
         title: 'そろばん式暗算トレーニング',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.darkTheme,
-        home: const HomeScreen(),
+        home: const ModeSelectScreen(),
       ),
     );
   }
