@@ -56,7 +56,7 @@ class ModeSelectScreen extends StatelessWidget {
                 const SizedBox(height: 20),
                 _ModeCard(
                   icon: Icons.tune,
-                  title: 'ケタ・口・秒 指定トレーニング',
+                  title: 'ケタ・口・秒数 指定\nトレーニング',
                   subtitle: '桁数・口数・出題時間を自由に設定して練習',
                   onTap: () => Navigator.of(context).push(
                     MaterialPageRoute(builder: (_) => const HomeScreen()),
@@ -65,7 +65,7 @@ class ModeSelectScreen extends StatelessWidget {
                 const SizedBox(height: 16),
                 _ModeCard(
                   icon: Icons.military_tech,
-                  title: '級位・段位 トレーニング',
+                  title: '級位・段位 指定\nトレーニング',
                   subtitle: '10級〜1級・初段〜十段の検定風メニューで練習',
                   onTap: () => Navigator.of(context).push(
                     MaterialPageRoute(

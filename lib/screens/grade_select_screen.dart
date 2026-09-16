@@ -125,7 +125,7 @@ class _GradeRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 5),
+      padding: const EdgeInsets.only(bottom: 4),
       child: InkWell(
         borderRadius: BorderRadius.circular(10),
         onTap: () => Navigator.of(context).push(
@@ -134,7 +134,7 @@ class _GradeRow extends StatelessWidget {
           ),
         ),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
           decoration: BoxDecoration(
             color: color.withValues(alpha: 0.14),
             borderRadius: BorderRadius.circular(10),
@@ -142,25 +142,30 @@ class _GradeRow extends StatelessWidget {
           ),
           child: Row(
             children: [
-              SizedBox(
-                width: 40,
-                child: Text(
-                  level.label,
-                  style: TextStyle(
-                    color: color,
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
               Expanded(
-                child: Text(
-                  level.specLabel,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: AppTheme.textSecondary,
-                    fontSize: 10.5,
-                  ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      level.label,
+                      style: TextStyle(
+                        color: color,
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        height: 1.1,
+                      ),
+                    ),
+                    const SizedBox(height: 1),
+                    Text(
+                      level.specLabel,
+                      style: const TextStyle(
+                        color: AppTheme.textSecondary,
+                        fontSize: 10.5,
+                        height: 1.1,
+                      ),
+                    ),
+                  ],
                 ),
               ),
               Icon(Icons.chevron_right, color: color, size: 16),
