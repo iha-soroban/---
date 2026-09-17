@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../models/grade_level.dart';
 import '../models/training_settings.dart';
 import '../models/training_result.dart';
+import '../models/grade_session_result.dart';
 import '../services/app_state.dart';
 import '../services/problem_generator.dart';
 import '../services/sound_service.dart';
@@ -180,6 +181,7 @@ class _GradeTrainingScreenState extends State<GradeTrainingScreen> {
       setState(() {
         _phase = _Phase.finalResult;
       });
+      _saveSessionResult();
       return;
     }
     setState(() {
@@ -190,6 +192,20 @@ class _GradeTrainingScreenState extends State<GradeTrainingScreen> {
       _generateProblem();
     });
     _startCountdown();
+  }
+
+  void _saveSessionResult() {
+    final passed = _correctCount >= passScore;
+    context.read<AppState>().addGradeSessionResult(
+      GradeSessionResult(
+        playedAt: DateTime.now(),
+        levelLabel: widget.level.label,
+        category: widget.level.category == GradeCategory.kyu ? 'kyu' : 'dan',
+        correctCount: _correctCount,
+        totalQuestions: totalQuestions,
+        passed: passed,
+      ),
+    );
   }
 
   void _retryAll() {

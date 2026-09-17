@@ -21,22 +21,12 @@ class ModeSelectScreen extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(
-                  Icons.flash_on,
-                  color: AppTheme.primaryYellow,
-                  size: 56,
+                Image.asset(
+                  'assets/icon/logo_mascot.png',
+                  width: 140,
+                  height: 140,
                 ),
-                const SizedBox(height: 12),
-                const Text(
-                  '伊波そろばん教室',
-                  style: TextStyle(
-                    color: AppTheme.primaryYellow,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1.2,
-                  ),
-                ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 8),
                 const Text(
                   'そろばん式暗算トレーニング',
                   style: TextStyle(
@@ -56,7 +46,7 @@ class ModeSelectScreen extends StatelessWidget {
                 const SizedBox(height: 20),
                 _ModeCard(
                   icon: Icons.tune,
-                  title: 'ケタ・口・秒数 指定\nトレーニング',
+                  title: 'ケタ・口・秒数\n指定トレーニング',
                   subtitle: '桁数・口数・出題時間を自由に設定して練習',
                   onTap: () => Navigator.of(context).push(
                     MaterialPageRoute(builder: (_) => const HomeScreen()),
@@ -65,7 +55,7 @@ class ModeSelectScreen extends StatelessWidget {
                 const SizedBox(height: 16),
                 _ModeCard(
                   icon: Icons.military_tech,
-                  title: '級位・段位 指定\nトレーニング',
+                  title: '級位・段位\n指定トレーニング',
                   subtitle: '10級〜1級・初段〜十段の検定風メニューで練習',
                   onTap: () => Navigator.of(context).push(
                     MaterialPageRoute(

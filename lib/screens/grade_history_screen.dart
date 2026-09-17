@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/app_state.dart';
-import '../models/training_result.dart';
+import '../models/grade_session_result.dart';
 import '../theme/app_theme.dart';
 
-class HistoryScreen extends StatelessWidget {
-  const HistoryScreen({super.key});
+/// 級位・段位トレーニングの成績・履歴画面。
+/// 各セット(15問)ごとの「何問中何問正解」「合格/不合格」を表示する。
+class GradeHistoryScreen extends StatelessWidget {
+  const GradeHistoryScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     final appState = context.watch<AppState>();
-    final history = appState.history;
+    final history = appState.gradeHistory;
 
     return CustomScrollView(
       slivers: [
@@ -51,7 +53,7 @@ class HistoryScreen extends StatelessWidget {
             hasScrollBody: false,
             child: Center(
               child: Text(
-                'まだ履歴がありません\nトレーニングを始めましょう!',
+                'まだ履歴がありません\n級位・段位トレーニングを始めましょう!',
                 textAlign: TextAlign.center,
                 style: TextStyle(color: AppTheme.textSecondary),
               ),
@@ -89,7 +91,7 @@ class HistoryScreen extends StatelessWidget {
           ),
           TextButton(
             onPressed: () {
-              appState.clearHistory();
+              appState.clearGradeHistory();
               Navigator.of(ctx).pop();
             },
             child: const Text(
@@ -106,24 +108,11 @@ class HistoryScreen extends StatelessWidget {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(20),
-        child: Column(
+        child: Row(
           children: [
-            Row(
-              children: [
-                _statBox('正解率', '${appState.accuracyRate.toStringAsFixed(0)}%'),
-                _statBox('総回数', '${appState.totalCount}'),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                _statBox('最高連続正解', '${appState.bestStreak}'),
-                _statBox(
-                  '平均回答時間',
-                  '${appState.averageAnswerTimeSec.toStringAsFixed(1)}秒',
-                ),
-              ],
-            ),
+            _statBox('合格率', '${appState.gradePassRate.toStringAsFixed(0)}%'),
+            _statBox('合格回数',
+                '${appState.gradePassedSessions} / ${appState.gradeTotalSessions}'),
           ],
         ),
       ),
@@ -155,9 +144,13 @@ class HistoryScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildHistoryTile(TrainingResult result) {
+  Widget _buildHistoryTile(GradeSessionResult result) {
     final dateStr =
         '${result.playedAt.month}/${result.playedAt.day} ${result.playedAt.hour.toString().padLeft(2, '0')}:${result.playedAt.minute.toString().padLeft(2, '0')}';
+
+    final categoryColor = result.category == 'kyu'
+        ? const Color(0xFF4CD964)
+        : const Color(0xFF29D1E8);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
@@ -170,10 +163,8 @@ class HistoryScreen extends StatelessWidget {
       child: Row(
         children: [
           Icon(
-            result.isCorrect ? Icons.check_circle : Icons.cancel,
-            color: result.isCorrect
-                ? AppTheme.accentGreen
-                : AppTheme.accentRed,
+            result.passed ? Icons.emoji_events : Icons.sentiment_dissatisfied,
+            color: result.passed ? AppTheme.accentGreen : AppTheme.accentRed,
             size: 26,
           ),
           const SizedBox(width: 14),
@@ -181,12 +172,25 @@ class HistoryScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  '${result.digitModeLabel} × ${result.flashCount}口  (${result.operationModeLabel})',
-                  style: const TextStyle(
-                    color: AppTheme.textPrimary,
-                    fontSize: 13,
-                  ),
+                Row(
+                  children: [
+                    Text(
+                      result.levelLabel,
+                      style: TextStyle(
+                        color: categoryColor,
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      '${result.correctCount} / ${result.totalQuestions}問正解',
+                      style: const TextStyle(
+                        color: AppTheme.textPrimary,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 2),
                 Text(
@@ -199,11 +203,27 @@ class HistoryScreen extends StatelessWidget {
               ],
             ),
           ),
-          Text(
-            '${(result.answerTimeMs / 1000).toStringAsFixed(1)}秒',
-            style: const TextStyle(
-              color: AppTheme.textSecondary,
-              fontSize: 12,
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              color: (result.passed ? AppTheme.accentGreen : AppTheme.accentRed)
+                  .withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: result.passed
+                    ? AppTheme.accentGreen
+                    : AppTheme.accentRed,
+              ),
+            ),
+            child: Text(
+              result.passed ? '合格' : '不合格',
+              style: TextStyle(
+                color: result.passed
+                    ? AppTheme.accentGreen
+                    : AppTheme.accentRed,
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ],

@@ -1,19 +1,23 @@
 import 'package:flutter/material.dart';
 import '../models/training_settings.dart';
 import '../models/training_result.dart';
+import '../models/grade_session_result.dart';
 import 'storage_service.dart';
 
 /// アプリ全体の状態管理(Provider)
 class AppState extends ChangeNotifier {
   TrainingSettings _settings = const TrainingSettings();
   List<TrainingResult> _history = [];
+  List<GradeSessionResult> _gradeHistory = [];
 
   TrainingSettings get settings => _settings;
   List<TrainingResult> get history => _history;
+  List<GradeSessionResult> get gradeHistory => _gradeHistory;
 
   Future<void> init() async {
     _settings = StorageService.loadSettings();
     _history = StorageService.loadResults();
+    _gradeHistory = StorageService.loadGradeSessionResults();
     notifyListeners();
   }
 
@@ -33,6 +37,28 @@ class AppState extends ChangeNotifier {
     _history = [];
     notifyListeners();
     await StorageService.clearResults();
+  }
+
+  // ---------------- 級位・段位 セット履歴 ----------------
+  Future<void> addGradeSessionResult(GradeSessionResult result) async {
+    _gradeHistory.insert(0, result);
+    notifyListeners();
+    await StorageService.addGradeSessionResult(result);
+  }
+
+  Future<void> clearGradeHistory() async {
+    _gradeHistory = [];
+    notifyListeners();
+    await StorageService.clearGradeSessionResults();
+  }
+
+  int get gradeTotalSessions => _gradeHistory.length;
+
+  int get gradePassedSessions => _gradeHistory.where((r) => r.passed).length;
+
+  double get gradePassRate {
+    if (gradeTotalSessions == 0) return 0;
+    return gradePassedSessions / gradeTotalSessions * 100;
   }
 
   // ---------------- 統計情報 ----------------
