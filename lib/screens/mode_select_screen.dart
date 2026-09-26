@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import 'home_screen.dart';
 import 'grade_select_screen.dart';
-import 'soroban_webview_screen.dart';
 
 /// アプリ起動時のトップ画面。
 /// 2つのトレーニングモードから選択する:
@@ -61,17 +60,6 @@ class ModeSelectScreen extends StatelessWidget {
                   onTap: () => Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (_) => const GradeSelectScreen(),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                _ModeCard(
-                  icon: Icons.grid_view_rounded,
-                  title: '電子そろばん',
-                  subtitle: '実際のそろばんのように珠を動かして練習できます',
-                  onTap: () => Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => const SorobanWebViewScreen(),
                     ),
                   ),
                 ),

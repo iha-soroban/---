@@ -26,10 +26,6 @@ dependencies:
   # Sound effects (flash beep)
   audioplayers: 6.1.0
 
-  # WebView for 電子そろばん
-  webview_flutter: 4.13.0
-  url_launcher: 6.3.1
-
 dev_dependencies:
   flutter_test:
     sdk: flutter
